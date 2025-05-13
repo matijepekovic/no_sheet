@@ -1,7 +1,7 @@
 // lib/presentation/pages/dashboard/dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../quotes/quotes_page.dart';
 import '../customers/customers_page.dart';
 import '../products/products_page.dart';
 import '../quotes/create_quote_page.dart';
