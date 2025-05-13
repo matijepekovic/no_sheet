@@ -1,10 +1,16 @@
 // lib/presentation/pages/dashboard/dashboard_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../customers/customers_page.dart';
 import '../products/products_page.dart';
-import '../quotes/quotes_page.dart';
+import '../quotes/create_quote_page.dart';
 import '../projects/projects_page.dart';
 import '../customers/add_customer_page.dart';
+import '../../blocs/quote/quote_bloc.dart';
+import '../../blocs/quote/quote_event.dart';
+import '../../blocs/quote/quote_state.dart';
+
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
 
@@ -22,6 +28,13 @@ class _DashboardPageState extends State<DashboardPage> {
     const ProjectsPage(),
     const ProductsPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load quotes when dashboard initializes
+    context.read<QuoteBloc>().add(LoadQuotes());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,14 +96,20 @@ class _DashboardPageState extends State<DashboardPage> {
             case 0: // Dashboard - no action
               break;
             case 1: // Customers - add customer
-          Navigator.push(
-          context,
-          MaterialPageRoute(
-          builder: (context) => const AddCustomerPage(),
-          ),
-          );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddCustomerPage(),
+                ),
+              );
               break;
             case 2: // Quotes - create quote
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateQuotePage(),
+                ),
+              );
               break;
             case 3: // Projects - add project
               break;
@@ -182,14 +201,32 @@ class DashboardHomeTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildActivityItem(
-            context,
-            title: 'New Quote Created',
-            description: 'Quote #1042 for John Smith',
-            time: '2 hours ago',
-            icon: Icons.description,
-            color: Colors.green,
+
+          // Recent quotes
+          BlocBuilder<QuoteBloc, QuoteState>(
+            builder: (context, state) {
+              if (state is QuotesLoaded && state.quotes.isNotEmpty) {
+                final latestQuote = state.quotes[0];
+                return _buildActivityItem(
+                  context,
+                  title: 'New Quote Created',
+                  description: '${latestQuote.title}',
+                  time: '${DateTime.now().difference(latestQuote.createdAt).inHours} hours ago',
+                  icon: Icons.description,
+                  color: Colors.green,
+                );
+              }
+              return _buildActivityItem(
+                context,
+                title: 'New Quote Created',
+                description: 'Quote #1042 for John Smith',
+                time: '2 hours ago',
+                icon: Icons.description,
+                color: Colors.green,
+              );
+            },
           ),
+
           _buildActivityItem(
             context,
             title: 'Project Status Updated',

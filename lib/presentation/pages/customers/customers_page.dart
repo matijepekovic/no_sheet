@@ -8,7 +8,9 @@ import 'add_customer_page.dart';
 import 'customer_detail_page.dart';
 
 class CustomersPage extends StatefulWidget {
-  const CustomersPage({Key? key}) : super(key: key);
+  final bool selectionMode;
+
+  const CustomersPage({Key? key, this.selectionMode = false}) : super(key: key);
 
   @override
   State<CustomersPage> createState() => _CustomersPageState();
@@ -16,6 +18,7 @@ class CustomersPage extends StatefulWidget {
 
 class _CustomersPageState extends State<CustomersPage> {
   late final CustomerRepositoryImpl _customerRepository;
+  String? _searchQuery;
 
   @override
   void initState() {
@@ -32,14 +35,41 @@ class _CustomersPageState extends State<CustomersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customers'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // Implement search functionality
-            },
+        title: _searchQuery == null
+            ? const Text('Customers')
+            : TextField(
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Search customers...',
+            hintStyle: TextStyle(color: Colors.white70),
+            border: InputBorder.none,
           ),
+          style: const TextStyle(color: Colors.white),
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+            });
+          },
+        ),
+        actions: [
+          if (_searchQuery == null)
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  _searchQuery = '';
+                });
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  _searchQuery = null;
+                });
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: () {
@@ -61,14 +91,23 @@ class _CustomersPageState extends State<CustomersPage> {
 
           final customers = snapshot.data ?? [];
 
-          if (customers.isEmpty) {
-            return const Center(child: Text('No customers yet'));
+          // Apply search filtering if query exists
+          final filteredCustomers = _searchQuery != null && _searchQuery!.isNotEmpty
+              ? customers.where((customer) =>
+          customer.name.toLowerCase().contains(_searchQuery!.toLowerCase()) ||
+              customer.phone.toLowerCase().contains(_searchQuery!.toLowerCase()) ||
+              (customer.email.isNotEmpty && customer.email.toLowerCase().contains(_searchQuery!.toLowerCase())))
+              .toList()
+              : customers;
+
+          if (filteredCustomers.isEmpty) {
+            return const Center(child: Text('No customers found'));
           }
 
           return ListView.builder(
-            itemCount: customers.length,
+            itemCount: filteredCustomers.length,
             itemBuilder: (context, index) {
-              final customer = customers[index];
+              final customer = filteredCustomers[index];
               return Card(
                 margin: const EdgeInsets.symmetric(
                   horizontal: 16.0,
@@ -76,22 +115,33 @@ class _CustomersPageState extends State<CustomersPage> {
                 ),
                 child: ListTile(
                   leading: CircleAvatar(
-                    child: Text(customer.name[0]),
+                    backgroundColor: Colors.blue.shade100,
+                    child: Text(
+                      customer.name[0],
+                      style: TextStyle(color: Colors.blue.shade800),
+                    ),
                   ),
                   title: Text(customer.name),
                   subtitle: Text(customer.phone),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: widget.selectionMode
+                      ? const Icon(Icons.check_circle_outline)
+                      : const Icon(Icons.chevron_right),
                   onTap: () async {
-                    final result = await Navigator.push<Customer?>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CustomerDetailPage(customer: customer),
-                      ),
-                    );
+                    if (widget.selectionMode) {
+                      // Return selected customer to previous page
+                      Navigator.pop(context, customer);
+                    } else {
+                      final result = await Navigator.push<Customer?>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CustomerDetailPage(customer: customer),
+                        ),
+                      );
 
-                    if (result != null) {
-                      // Customer was updated
-                      await _customerRepository.updateCustomer(result);
+                      if (result != null) {
+                        // Customer was updated
+                        await _customerRepository.updateCustomer(result);
+                      }
                     }
                   },
                 ),
@@ -100,7 +150,20 @@ class _CustomersPageState extends State<CustomersPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: widget.selectionMode
+          ? FloatingActionButton(
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddCustomerPage(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+        tooltip: 'Add New Customer',
+      )
+          : FloatingActionButton(
         onPressed: () async {
           await Navigator.push(
             context,

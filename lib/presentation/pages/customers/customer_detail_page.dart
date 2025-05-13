@@ -227,19 +227,31 @@ class CustomerDetailPage extends StatelessWidget {
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false,  // Prevent closing by tapping outside
-      builder: (dialogContext) => AlertDialog(  // Use dialogContext
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Customer'),
         content: Text('Are you sure you want to delete ${customer.name}?'),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(dialogContext).pop();  // Close dialog only
+              Navigator.of(dialogContext).pop(); // Just close dialog
             },
             child: const Text('CANCEL'),
           ),
           TextButton(
             onPressed: () async {
+              // Show loading indicator in dialog
+              showDialog(
+                context: dialogContext,
+                barrierDismissible: false,
+                builder: (_) => const AlertDialog(
+                  content: SizedBox(
+                    height: 100,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+              );
+
               try {
                 // Initialize repository
                 final userId = FirebaseAuth.instance.currentUser?.uid ?? 'test-user-id';
@@ -251,18 +263,20 @@ class CustomerDetailPage extends StatelessWidget {
                 // Delete from Firestore
                 await customerRepository.deleteCustomer(customer.id);
 
-                // First close the dialog
-                Navigator.of(dialogContext).pop();
+                // Explicitly close all dialogs and navigate back
+                Navigator.of(context).popUntil((route) => route.isFirst || route.settings.name == '/customers');
 
-                // Then navigate back to customers list
-                Navigator.of(context).pop();
-
-                // Show success message AFTER navigation
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Customer deleted successfully')),
-                );
+                // Use a delay to ensure navigation completes before showing snackbar
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Customer deleted successfully')),
+                    );
+                  }
+                });
               } catch (e) {
-                // Close dialog on error
+                // Close any open dialogs
+                Navigator.of(context).pop();
                 Navigator.of(dialogContext).pop();
 
                 // Show error message
@@ -276,5 +290,4 @@ class CustomerDetailPage extends StatelessWidget {
         ],
       ),
     );
-  }
-}
+  }}

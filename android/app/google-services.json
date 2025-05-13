@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "458115766413",
+    "project_id": "nosheet-fabbd",
+    "storage_bucket": "nosheet-fabbd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458115766413:android:8b8ad6ec4843356d6b2ac4",
+        "android_client_info": {
+          "package_name": "com.example.no_sheet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX7jWBt7WLBqVF-OEX6554d-Xh_enkndM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

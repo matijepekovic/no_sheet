@@ -1,8 +1,25 @@
 // lib/core/services/auth_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Check if user is authenticated
+  bool get isAuthenticated => _auth.currentUser != null;
+
+  // Get current user ID with fallback for development
+  String get currentUserId {
+    final user = _auth.currentUser;
+    if (user != null) {
+      return user.uid;
+    } else {
+      // For development only! Remove in production
+      debugPrint('WARNING: Using fallback user ID for development');
+      return 'dev-user-id';
+    }
+  }
 
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
