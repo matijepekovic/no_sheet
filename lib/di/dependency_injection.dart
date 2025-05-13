@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
-
+import '../presentation/blocs/dashboard/dashboard_bloc.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../data/repositories/customer_repository_impl.dart';
 import '../data/repositories/product_repository_impl.dart';
@@ -86,5 +86,13 @@ void setupDependencies() {
 
   getIt.registerFactory(
         () => QuoteBloc(quoteRepository: getIt<QuoteRepository>()),
+  );
+  getIt.registerFactory(
+        () => DashboardBloc(
+      customerRepository: getIt<CustomerRepository>(),
+      quoteRepository: getIt<QuoteRepository>(),
+      projectRepository: getIt<ProjectRepository>(),
+      productRepository: getIt<ProductRepository>(),
+    ),
   );
 }
