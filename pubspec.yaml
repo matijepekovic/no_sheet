@@ -10,39 +10,30 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # Firebase packages
-  firebase_core: ^3.0.0
-  firebase_auth: ^5.0.0
-  firebase_auth_web: ^5.0.0
-  firebase_messaging: ^15.0.0
-  firebase_messaging_web: ^3.0.0
-  firebase_storage: ^12.0.0
-  firebase_storage_web: ^3.0.0
-  cloud_firestore: ^5.0.0
   # State management
-  flutter_bloc: ^9.0.0 # Relaxed constraint
-  equatable: ^2.0.5 # No newer major version suggested, keep as is or check for minor updates if needed
-  get_it: ^8.0.0 # Relaxed constraint
+  flutter_bloc: ^9.0.0
+  equatable: ^2.0.5
+  get_it: ^8.0.0
   # Local storage
-  hive: ^2.2.3 # No newer major version suggested
-  hive_flutter: ^1.1.0 # No newer major version suggested
-  path_provider: ^2.1.0 # No newer major version suggested
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.0
   # Utilities
-  intl: ^0.20.0 # Relaxed constraint
-  uuid: ^4.0.0 # Relaxed constraint
-  connectivity_plus: ^6.0.0 # Relaxed constraint
-  pdf: ^3.0.0 # No newer major version suggested
-  printing: ^5.0.0 # No newer major version suggested
+  intl: ^0.20.0
+  uuid: ^4.0.0
+  connectivity_plus: ^6.0.0
+  pdf: ^3.0.0
+  printing: ^5.0.0
   # UI components
-  image_picker: ^1.0.0 # No newer major version suggested
-  cached_network_image: ^3.0.0 # Relaxed constraint
-  shared_preferences: ^2.0.0 # No newer major version suggested
-  flutter_svg: ^2.0.0 # No newer major version suggested
-  url_launcher: ^6.0.0 # No newer major version suggested
-  fl_chart: ^1.0.0 # Relaxed constraint
-  google_fonts: ^6.0.0 # Relaxed constraint
+  image_picker: ^1.0.0
+  cached_network_image: ^3.0.0
+  shared_preferences: ^2.0.0
+  flutter_svg: ^2.0.0
+  url_launcher: ^6.0.0
+  fl_chart: ^1.0.0
+  google_fonts: ^6.0.0
   # iOS style icons
-  cupertino_icons: ^1.0.8 # No newer major version suggested
+  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:

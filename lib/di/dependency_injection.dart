@@ -1,9 +1,8 @@
 // lib/di/dependency_injection.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import '../presentation/blocs/dashboard/dashboard_bloc.dart';
+import '../core/services/auth_service.dart';
+import '../core/services/local_storage_service.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../data/repositories/customer_repository_impl.dart';
 import '../data/repositories/product_repository_impl.dart';
@@ -24,45 +23,37 @@ import '../presentation/blocs/quote/quote_bloc.dart';
 final getIt = GetIt.instance;
 
 void setupDependencies() {
-  // Firebase services
-  getIt.registerLazySingleton(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton(() => FirebaseFirestore.instance);
-  getIt.registerLazySingleton(() => FirebaseStorage.instance);
-
   // Core services
+  getIt.registerLazySingleton(() => AuthService());
+  getIt.registerLazySingleton(() => LocalStorageService());
   getIt.registerLazySingleton(() => PdfService());
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(auth: getIt<FirebaseAuth>()),
+        () => AuthRepositoryImpl(authService: getIt<AuthService>()),
   );
 
   getIt.registerFactory<CustomerRepository>(
         () => CustomerRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
-      userId: getIt<FirebaseAuth>().currentUser?.uid ?? 'test-user-id',
+      userId: getIt<AuthService>().currentUserId,
     ),
   );
 
   getIt.registerFactory<ProductRepository>(
         () => ProductRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
-      userId: getIt<FirebaseAuth>().currentUser?.uid ?? 'test-user-id',
+      userId: getIt<AuthService>().currentUserId,
     ),
   );
 
   getIt.registerFactory<ProjectRepository>(
         () => ProjectRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
-      userId: getIt<FirebaseAuth>().currentUser?.uid ?? 'test-user-id',
+      userId: getIt<AuthService>().currentUserId,
     ),
   );
 
   getIt.registerFactory<QuoteRepository>(
         () => QuoteRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
-      storage: getIt<FirebaseStorage>(),
-      userId: getIt<FirebaseAuth>().currentUser?.uid ?? 'test-user-id',
+      userId: getIt<AuthService>().currentUserId,
       pdfService: getIt<PdfService>(),
     ),
   );
@@ -87,6 +78,7 @@ void setupDependencies() {
   getIt.registerFactory(
         () => QuoteBloc(quoteRepository: getIt<QuoteRepository>()),
   );
+
   getIt.registerFactory(
         () => DashboardBloc(
       customerRepository: getIt<CustomerRepository>(),

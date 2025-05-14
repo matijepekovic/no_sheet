@@ -1,57 +1,94 @@
 // lib/core/services/auth_service.dart
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Simple User class to replace Firebase User
+class User {
+  final String uid;
+  final String email;
+  final String? displayName;
+
+  User({required this.uid, required this.email, this.displayName});
+}
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Singleton instance
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  AuthService._internal();
 
-  // Check if user is authenticated
-  bool get isAuthenticated => _auth.currentUser != null;
+  // Auth state stream controller
+  final _authStateController = StreamController<User?>.broadcast();
+
+  // Mock user data
+  User? _currentUser;
+
+  // Simulate checking if user is authenticated
+  bool get isAuthenticated => _currentUser != null;
 
   // Get current user ID with fallback for development
   String get currentUserId {
-    final user = _auth.currentUser;
-    if (user != null) {
-      return user.uid;
-    } else {
-      // For development only! Remove in production
-      debugPrint('WARNING: Using fallback user ID for development');
-      return 'dev-user-id';
-    }
+    return _currentUser?.uid ?? 'dev-user-id';
   }
 
   // Auth state changes stream
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Stream<User?> get authStateChanges => _authStateController.stream;
 
   // Sign in with email and password
-  Future<UserCredential> signInWithEmailAndPassword(
-      String email, String password) async {
-    return await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  Future<User> signInWithEmailAndPassword(String email, String password) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (email == 'test@example.com' && password == 'password') {
+      _currentUser = User(
+        uid: 'test-user-id',
+        email: email,
+        displayName: 'Test User',
+      );
+      _authStateController.add(_currentUser);
+      return _currentUser!;
+    } else {
+      throw Exception('Invalid email or password');
+    }
   }
 
   // Register with email and password
-  Future<UserCredential> createUserWithEmailAndPassword(
-      String email, String password) async {
-    return await _auth.createUserWithEmailAndPassword(
+  Future<User> createUserWithEmailAndPassword(String email, String password) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    _currentUser = User(
+      uid: 'new-user-${DateTime.now().millisecondsSinceEpoch}',
       email: email,
-      password: password,
+      displayName: null,
     );
+    _authStateController.add(_currentUser);
+    return _currentUser!;
   }
 
   // Sign out
   Future<void> signOut() async {
-    return await _auth.signOut();
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    _currentUser = null;
+    _authStateController.add(null);
   }
 
   // Reset password
   Future<void> resetPassword(String email) async {
-    return await _auth.sendPasswordResetEmail(email: email);
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Just pretend it worked
+    return;
   }
 
   // Get current user
-  User? get currentUser => _auth.currentUser;
+  User? get currentUser => _currentUser;
+
+  // Clean up when done
+  void dispose() {
+    _authStateController.close();
+  }
 }

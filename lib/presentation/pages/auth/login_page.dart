@@ -1,8 +1,6 @@
 // lib/presentation/pages/auth/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../core/services/auth_service.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
 import '../../../presentation/blocs/auth/auth_event.dart';
 import '../../../presentation/blocs/auth/auth_state.dart';
@@ -21,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -31,7 +28,6 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            // Navigate to dashboard on successful login
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const DashboardPage()),
             );
@@ -153,7 +149,6 @@ class _LoginPageState extends State<LoginPage> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Use the BlocProvider to dispatch the sign in event
       context.read<AuthBloc>().add(
         SignIn(
           email: _emailController.text.trim(),
